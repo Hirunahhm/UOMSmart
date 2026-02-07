@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "659166158048",
+    "project_id": "uom-smart",
+    "storage_bucket": "uom-smart.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659166158048:android:2578ef006a8e1ea3924485",
+        "android_client_info": {
+          "package_name": "com.example.uomsmart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "659166158048-7si69j41r4lu13p9moa9dvf3nsn7egfc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.uomsmart",
+            "certificate_hash": "0313555e824e4ae78fdd2461ff985b6404ca3888"
+          }
+        },
+        {
+          "client_id": "659166158048-c288jdc4duk7k3t8pj3nnrda42v8gon6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXgzbRNe5484UoiKP6y8Xpgo7x3fD_HTY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "659166158048-c288jdc4duk7k3t8pj3nnrda42v8gon6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,29 +5,37 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,6 +46,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.uomsmart.R
@@ -47,12 +56,20 @@ import com.example.uomsmart.ui.theme.TextSecondary
 
 @Composable
 fun LoginScreen(
-    onLoginClick: (email: String, password: String) -> Unit,
-    onSsoClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit
+    onSignIn: (email: String, password: String) -> Unit,
+    onSignUp: (name: String, email: String, password: String) -> Unit,
+    onGoogleSignIn: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    isLoading: Boolean = false,
+    errorMessage: String? = null
 ) {
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Sign In", "Sign Up")
+    
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     
     Scaffold(
         topBar = {
@@ -63,7 +80,7 @@ fun LoginScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Text(
-                    text = "Login",
+                    text = "Welcome",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Black
@@ -81,7 +98,7 @@ fun LoginScreen(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
             // Logo
             Box(
@@ -101,7 +118,7 @@ fun LoginScreen(
                 )
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             
             Text(
                 text = "UOM Smart",
@@ -110,7 +127,91 @@ fun LoginScreen(
                 color = SplashBlueAccent
             )
             
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Tab Row for Sign In / Sign Up
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                containerColor = Color.Transparent,
+                contentColor = SplashButtonBlue,
+                indicator = { tabPositions ->
+                    TabRowDefaults.Indicator(
+                        modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                        color = SplashButtonBlue
+                    )
+                }
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index },
+                        text = {
+                            Text(
+                                text = title,
+                                fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Error message
+            errorMessage?.let {
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            
+            // Sign Up: Name field (only shown on Sign Up tab)
+            if (selectedTabIndex == 1) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        text = "Full Name",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Black
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        placeholder = {
+                            Text(
+                                text = "Enter your full name",
+                                color = TextSecondary
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Outlined.Person,
+                                contentDescription = "Name",
+                                tint = TextSecondary
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = Color.LightGray,
+                            focusedBorderColor = SplashButtonBlue,
+                            unfocusedContainerColor = Color.White,
+                            focusedContainerColor = Color.White
+                        ),
+                        singleLine = true,
+                        enabled = !isLoading
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             
             // Email field
             Column(
@@ -149,7 +250,8 @@ fun LoginScreen(
                         focusedContainerColor = Color.White
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !isLoading
                 )
             }
             
@@ -193,51 +295,139 @@ fun LoginScreen(
                     ),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !isLoading
                 )
+            }
+            
+            // Confirm password (only on Sign Up tab)
+            if (selectedTabIndex == 1) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        text = "Confirm Password",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.Black
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = { confirmPassword = it },
+                        placeholder = {
+                            Text(
+                                text = "Re-enter your password",
+                                color = TextSecondary
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Outlined.Lock,
+                                contentDescription = "Confirm Password",
+                                tint = TextSecondary
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = Color.LightGray,
+                            focusedBorderColor = SplashButtonBlue,
+                            unfocusedContainerColor = Color.White,
+                            focusedContainerColor = Color.White
+                        ),
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true,
+                        enabled = !isLoading
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Sign in button
+            // Primary action button (Sign In / Sign Up)
             Button(
-                onClick = { onLoginClick(email, password) },
+                onClick = {
+                    if (selectedTabIndex == 0) {
+                        onSignIn(email, password)
+                    } else {
+                        if (password == confirmPassword) {
+                            onSignUp(name, email, password)
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = SplashButtonBlue
-                )
+                ),
+                enabled = !isLoading
             ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = if (selectedTabIndex == 0) "Sign In" else "Create Account",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Divider with "or"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Divider(
+                    modifier = Modifier.weight(1f),
+                    color = Color.LightGray
+                )
                 Text(
-                    text = "Sign in",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    text = "  or  ",
+                    color = TextSecondary,
+                    fontSize = 14.sp
+                )
+                Divider(
+                    modifier = Modifier.weight(1f),
+                    color = Color.LightGray
                 )
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
-            // SSO button
+            // Google Sign In button
             OutlinedButton(
-                onClick = onSsoClick,
+                onClick = onGoogleSignIn,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = Color.Black
-                )
+                ),
+                enabled = !isLoading
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_login),
-                    contentDescription = "SSO",
-                    modifier = Modifier.size(20.dp)
+                    painter = painterResource(id = R.drawable.ic_google),
+                    contentDescription = "Google",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.Unspecified
                 )
-                Spacer(modifier = Modifier.size(8.dp))
+                Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Sign in with SSO",
+                    text = "Continue with Google",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -245,14 +435,16 @@ fun LoginScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Forgot password
-            Text(
-                text = "Forgot password?",
-                color = SplashButtonBlue,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.clickable { onForgotPasswordClick() }
-            )
+            // Forgot password (only on Sign In tab)
+            if (selectedTabIndex == 0) {
+                Text(
+                    text = "Forgot password?",
+                    color = SplashButtonBlue,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable { onForgotPasswordClick() }
+                )
+            }
         }
     }
 }

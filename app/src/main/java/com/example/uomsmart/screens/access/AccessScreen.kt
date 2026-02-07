@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,154 +41,192 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.uomsmart.R
 import com.example.uomsmart.ui.theme.SplashButtonBlue
-import kotlinx.coroutines.delay
+import com.example.uomsmart.viewmodel.AuthViewModel
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.common.BitMatrix
 import kotlin.random.Random
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccessScreen(
-    studentName: String = "John Doe",
-    studentId: String = "UJD9924456",
-    onBackClick: () -> Unit = {}
-) {
+fun AccessScreen(authViewModel: AuthViewModel = viewModel(), onBackClick: () -> Unit = {}) {
+    val userProfile = authViewModel.userProfile
+
+    // Fallback or loading if profile not yet loaded
+    val studentName = userProfile?.name ?: "Loading..."
+    val studentId = userProfile?.studentId ?: "..."
+
     var refreshTimer by remember { mutableIntStateOf(60) }
-    var qrContent by remember { mutableStateOf(generateQrContent(studentId)) }
-    
-    // Countdown timer
-    LaunchedEffect(key1 = qrContent) {
-        refreshTimer = 60
-        while (refreshTimer > 0) {
-            delay(1000)
-            refreshTimer--
-        }
-        // Regenerate QR code when timer reaches 0
-        qrContent = generateQrContent(studentId)
-    }
-    
-    Scaffold(
-        topBar = {
-            Column {
-                CenterAlignedTopAppBar(
-                    title = { 
-                        Text(
-                            "Digital Gate Pass",
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Color.White
-                    )
-                )
-                Divider(color = Color.LightGray.copy(alpha = 0.5f))
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFF8F7FC))
-                .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // QR Code Container
-            Box(
-                modifier = Modifier
-                    .padding(32.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFFE8EEF8))
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // QR Code placeholder - in real app, generate with ZXing
-                    Box(
-                        modifier = Modifier
-                            .size(180.dp)
-                            .background(Color.White),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        // Simulated QR pattern
-                        Text(
-                            text = "QR",
-                            fontSize = 40.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Text(
-                        text = studentId,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Black
-                    )
+    var qrBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    // Countdown and QR regeneration timer
+    LaunchedEffect(key1 = userProfile) {
+        if (userProfile != null) {
+            qrBitmap = generateQrBitmap(generateQrContent(userProfile.studentId))
+            refreshTimer = 60
+            while (true) {
+                if (refreshTimer > 0) {
+                    delay(1000)
+                    refreshTimer--
+                } else {
+                    refreshTimer = 60
+                    qrBitmap = generateQrBitmap(generateQrContent(userProfile.studentId))
                 }
             }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Refresh Timer
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_clock),
-                    contentDescription = "Timer",
-                    tint = SplashButtonBlue,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Refreshes in ${refreshTimer}s",
-                    color = SplashButtonBlue,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
+        }
+    }
+
+    Scaffold(
+            topBar = {
+                Column {
+                    CenterAlignedTopAppBar(
+                            title = { Text("Digital Gate Pass", fontWeight = FontWeight.SemiBold) },
+                            navigationIcon = {
+                                IconButton(onClick = onBackClick) {
+                                    Icon(
+                                            imageVector = Icons.Default.ArrowBack,
+                                            contentDescription = "Back"
+                                    )
+                                }
+                            },
+                            colors =
+                                    TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                            containerColor = Color.White
+                                    )
+                    )
+                    Divider(color = Color.LightGray.copy(alpha = 0.5f))
+                }
             }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Verified Badge
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFFE8F5E9))
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_verified),
-                    contentDescription = "Verified",
-                    tint = Color(0xFF4CAF50),
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Verified Student: $studentName",
-                    color = Color(0xFF4CAF50),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
+    ) { paddingValues ->
+        Column(
+                modifier =
+                        Modifier.fillMaxSize().background(Color(0xFFF8F7FC)).padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+        ) {
+            if (userProfile == null) {
+                CircularProgressIndicator(color = SplashButtonBlue)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Fetching student details...")
+            } else {
+                // QR Code Container
+                Box(
+                        modifier =
+                                Modifier.padding(32.dp)
+                                        .clip(RoundedCornerShape(24.dp))
+                                        .background(Color(0xFFE8EEF8))
+                                        .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        // QR Code
+                        Box(
+                                modifier =
+                                        Modifier.size(200.dp).background(Color.White).padding(8.dp),
+                                contentAlignment = Alignment.Center
+                        ) {
+                            if (qrBitmap != null) {
+                                Image(
+                                        bitmap = qrBitmap!!.asImageBitmap(),
+                                        contentDescription = "Access QR Code",
+                                        modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                CircularProgressIndicator(
+                                        modifier = Modifier.size(32.dp),
+                                        color = SplashButtonBlue
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                                text = studentId,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Refresh Timer
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                            painter = painterResource(id = R.drawable.ic_clock),
+                            contentDescription = "Timer",
+                            tint = SplashButtonBlue,
+                            modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                            text = "Refreshes in ${refreshTimer}s",
+                            color = SplashButtonBlue,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Verified Badge
+                Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier =
+                                Modifier.clip(RoundedCornerShape(20.dp))
+                                        .background(Color(0xFFE8F5E9))
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Icon(
+                            painter = painterResource(id = R.drawable.ic_verified),
+                            contentDescription = "Verified",
+                            tint = Color(0xFF4CAF50),
+                            modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                            text = "Verified Student: $studentName",
+                            color = Color(0xFF4CAF50),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }
 }
 
 private fun generateQrContent(studentId: String): String {
-    return "$studentId-${System.currentTimeMillis()}-${Random.nextInt(1000, 9999)}"
+    // Format: STUDENT_ID|TIMESTAMP|SALT
+    return "$studentId|${System.currentTimeMillis()}|${Random.nextInt(1000, 9999)}"
+}
+
+private fun generateQrBitmap(content: String): Bitmap? {
+    return try {
+        val width = 512
+        val height = 512
+        val bitMatrix: BitMatrix =
+                MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height)
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        for (x in 0 until width) {
+            for (y in 0 until height) {
+                bitmap.setPixel(
+                        x,
+                        y,
+                        if (bitMatrix[x, y]) android.graphics.Color.BLACK
+                        else android.graphics.Color.WHITE
+                )
+            }
+        }
+        bitmap
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }

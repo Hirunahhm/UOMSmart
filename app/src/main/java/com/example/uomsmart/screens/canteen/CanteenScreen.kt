@@ -49,15 +49,15 @@ import com.example.uomsmart.ui.theme.SplashButtonBlue
 @Composable
 fun CanteenScreen(
     onBackClick: () -> Unit = {},
-    onMealBooked: (Meal, Double) -> Unit = { _, _ -> }
+    onMealBooked: (Meal, Double) -> Unit = { _, _ -> },
+    viewModel: com.example.uomsmart.viewmodel.CanteenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     var walletBalance by remember { mutableStateOf(950.75) }
     
-    val meals = listOf(
-        Meal("1", "Rice & Curry", "A traditional Sri Lankan meal featuring fragrant rice served with a variety of flavorful curries.", 250.00),
-        Meal("2", "Pasta Carbonara", "Classic Italian pasta dish made with eggs, hard cheese (Pecorino Romano or Parmesan), cured", 320.00),
-        Meal("3", "Vegan Buddha Bowl", "A wholesome and nutritious bowl filled with quinoa, roasted sweet potatoes, fresh avocado,", 280.00)
-    )
+    // Observe ViewModel state
+    val meals = viewModel.meals
+    val isLoading = viewModel.isLoading
+    val errorMessage = viewModel.errorMessage
     
     Scaffold(
         topBar = {
@@ -91,6 +91,33 @@ fun CanteenScreen(
                 .background(Color(0xFFF8F7FC))
                 .padding(paddingValues)
         ) {
+            // Loading State
+            if (isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            color = SplashButtonBlue
+                        )
+                    }
+                }
+            }
+            
+            // Error State
+            errorMessage?.let { error ->
+                item {
+                    Text(
+                        text = error,
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
             // Wallet Section
             item {
                 Row(

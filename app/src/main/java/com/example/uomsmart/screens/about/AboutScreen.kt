@@ -1,6 +1,5 @@
 package com.example.uomsmart.screens.about
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
@@ -38,101 +36,104 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(
-    developerName: String = "John Doe",
-    gihId: String = "UOM007",
-    instituteName: String = "University of Moratuwa",
-    onBackClick: () -> Unit = {}
+        developerName: String = "Hiruna Malavipathirana",
+        gihId: String = "GIH126HIR",
+        instituteName: String = "University of Moratuwa",
+        onBackClick: () -> Unit = {},
+        onLogoutClick: () -> Unit = {}
 ) {
     Scaffold(
-        topBar = {
-            Column {
-                CenterAlignedTopAppBar(
-                    title = { 
-                        Text(
-                            "About Developer",
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Color.White
+            topBar = {
+                Column {
+                    CenterAlignedTopAppBar(
+                            title = { Text("About Developer", fontWeight = FontWeight.SemiBold) },
+                            navigationIcon = {
+                                IconButton(onClick = onBackClick) {
+                                    Icon(
+                                            imageVector = Icons.Default.ArrowBack,
+                                            contentDescription = "Back"
+                                    )
+                                }
+                            },
+                            colors =
+                                    TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                            containerColor = Color.White
+                                    )
                     )
-                )
-                Divider(color = Color.LightGray.copy(alpha = 0.5f))
+                    Divider(color = Color.LightGray.copy(alpha = 0.5f))
+                }
             }
-        }
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(paddingValues)
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                modifier =
+                        Modifier.fillMaxSize()
+                                .background(Color.White)
+                                .padding(paddingValues)
+                                .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
         ) {
             // Profile Photo Placeholder
             Box(
-                modifier = Modifier
-                    .size(140.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFE8E8E8))
-                    .border(4.dp, Color.LightGray, CircleShape),
-                contentAlignment = Alignment.Center
+                    modifier =
+                            Modifier.size(140.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFE8E8E8))
+                                    .border(4.dp, Color.LightGray, CircleShape),
+                    contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile",
-                    modifier = Modifier.size(80.dp),
-                    tint = Color.Gray
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile",
+                        modifier = Modifier.size(80.dp),
+                        tint = Color.Gray
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             // Developer Name
             Text(
-                text = developerName,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
+                    text = developerName,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
             )
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             // GIH ID
-            Text(
-                text = "GIH ID: $gihId",
-                fontSize = 16.sp,
-                color = Color.Gray
-            )
-            
+            Text(text = "GIH ID: $gihId", fontSize = 16.sp, color = Color.Gray)
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Institute Name
-            Text(
-                text = "Institute: $instituteName",
-                fontSize = 16.sp,
-                color = Color.Gray
-            )
-            
+            Text(text = "Institute: $instituteName", fontSize = 16.sp, color = Color.Gray)
+
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             // Hackathon Submission Text (Required)
             Text(
-                text = "Submitted by $developerName as a part of the Great Indian Hackathon.",
-                fontSize = 14.sp,
-                color = Color.Gray,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                    text = "Submitted by $developerName as a part of the Great Indian Hackathon.",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
             )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // Logout Button
+            androidx.compose.material3.OutlinedButton(
+                    onClick = onLogoutClick,
+                    colors =
+                            androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                                    contentColor = Color.Red
+                            ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.Red),
+                    modifier = Modifier.fillMaxWidth()
+            ) { Text(text = "Unlink Account & Logout") }
         }
     }
 }
