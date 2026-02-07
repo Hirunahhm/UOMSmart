@@ -151,12 +151,8 @@ fun NavGraph(navController: NavHostController, startDestination: String = Screen
                                 popUpTo(Screen.Home.route) { inclusive = true }
                             }
                         },
-                        onMealBooked = { meal, newBalance ->
-                            val token =
-                                    "UOM-M#${(100000..999999).random().toString(16).uppercase()}"
-                            navController.navigate(
-                                    Screen.BookingConfirmed.createRoute(token, newBalance)
-                            )
+                        onTransactionHistoryClick = {
+                            navController.navigate(Screen.TransactionHistory.route)
                         }
                 )
             }
@@ -205,6 +201,12 @@ fun NavGraph(navController: NavHostController, startDestination: String = Screen
                                 popUpTo(Screen.Home.route) { inclusive = true }
                             }
                         }
+                )
+            }
+
+            composable(route = Screen.TransactionHistory.route) {
+                com.example.uomsmart.screens.wallet.TransactionHistoryScreen(
+                        onBackClick = { navController.popBackStack() }
                 )
             }
         }
