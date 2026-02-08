@@ -15,6 +15,9 @@ import kotlinx.coroutines.launch
 class HomeViewModel : ViewModel() {
     private val eventRepository = EventRepository()
     private val occupancyRepository = OccupancyRepository()
+    private val userRepository = com.example.uomsmart.data.repository.UserRepository()
+    private val transactionRepository = com.example.uomsmart.data.repository.TransactionRepository()
+    private val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
 
     var events by mutableStateOf<List<Event>>(emptyList())
         private set
@@ -28,8 +31,42 @@ class HomeViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
+    var walletBalance by mutableStateOf(0.0)
+        private set
+
     init {
         loadData()
+        loadWalletBalance()
+    }
+
+    fun loadWalletBalance() {
+        val userId = auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            userRepository.getWalletBalance(userId).onSuccess { balance -> walletBalance = balance }
+        }
+    }
+
+    fun topUpWallet(amount: Double) {
+        val userId = auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            isLoading = true
+            userRepository
+                    .topUpWallet(userId, amount)
+                    .onSuccess { newBalance ->
+                        walletBalance = newBalance
+                        // Create Transaction Record
+                        val transaction =
+                                com.example.uomsmart.data.models.Transaction(
+                                        userId = userId,
+                                        amount = amount,
+                                        type = "CREDIT",
+                                        description = "Top Up"
+                                )
+                        transactionRepository.createTransaction(transaction)
+                    }
+                    .onFailure { errorMessage = "Top Up Failed: ${it.message}" }
+            isLoading = false
+        }
     }
 
     fun loadData() {
