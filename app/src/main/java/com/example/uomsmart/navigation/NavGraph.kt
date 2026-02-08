@@ -139,7 +139,7 @@ fun NavGraph(navController: NavHostController, startDestination: String = Screen
             composable(route = Screen.Home.route) {
                 HomeScreen(
                         onAiScoutClick = {
-                            // TODO: Open AI Scout dialog
+                            navController.navigate(Screen.SustainabilityScout.route)
                         }
                 )
             }
@@ -206,6 +206,12 @@ fun NavGraph(navController: NavHostController, startDestination: String = Screen
 
             composable(route = Screen.TransactionHistory.route) {
                 com.example.uomsmart.screens.wallet.TransactionHistoryScreen(
+                        onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.SustainabilityScout.route) {
+                com.example.uomsmart.screens.scout.ScoutScreen(
                         onBackClick = { navController.popBackStack() }
                 )
             }
