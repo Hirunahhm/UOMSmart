@@ -1,5 +1,6 @@
 package com.example.uomsmart.screens.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,13 +54,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.uomsmart.R
 import com.example.uomsmart.data.models.Event
 import com.example.uomsmart.data.models.Occupancy
-import com.example.uomsmart.ui.theme.SplashBlueAccent
 import com.example.uomsmart.ui.theme.SplashButtonBlue
 import com.example.uomsmart.ui.theme.UOMGold
 import com.example.uomsmart.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen(onAiScoutClick: () -> Unit = {}, viewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(
+        onAiScoutClick: () -> Unit = {},
+        onSettingsClick: () -> Unit = {},
+        onNotificationClick: () -> Unit = {},
+        viewModel: HomeViewModel = viewModel()
+) {
         // Observe ViewModel state
         val events = viewModel.events
         val occupancies = viewModel.occupancies
@@ -175,7 +181,7 @@ fun HomeScreen(onAiScoutClick: () -> Unit = {}, viewModel: HomeViewModel = viewM
                                                 modifier =
                                                         Modifier.size(44.dp)
                                                                 .background(
-                                                                        SplashBlueAccent,
+                                                                        SplashButtonBlue,
                                                                         RoundedCornerShape(12.dp)
                                                                 ),
                                                 contentAlignment = Alignment.Center
@@ -194,7 +200,7 @@ fun HomeScreen(onAiScoutClick: () -> Unit = {}, viewModel: HomeViewModel = viewM
                                         }
 
                                         Row {
-                                                IconButton(onClick = {}) {
+                                                IconButton(onClick = onNotificationClick) {
                                                         Icon(
                                                                 painter =
                                                                         painterResource(
@@ -207,7 +213,7 @@ fun HomeScreen(onAiScoutClick: () -> Unit = {}, viewModel: HomeViewModel = viewM
                                                                 tint = Color.Gray
                                                         )
                                                 }
-                                                IconButton(onClick = {}) {
+                                                IconButton(onClick = onSettingsClick) {
                                                         Icon(
                                                                 painter =
                                                                         painterResource(
@@ -325,6 +331,19 @@ fun HomeScreen(onAiScoutClick: () -> Unit = {}, viewModel: HomeViewModel = viewM
 
 @Composable
 fun EventCard(event: Event) {
+        // Map event title to local drawable resource
+        val imageRes =
+                when {
+                        event.title.contains("Tech", ignoreCase = true) ||
+                                event.title.contains("Innovation", ignoreCase = true) ->
+                                R.drawable.tech_innovation
+                        event.title.contains("Career", ignoreCase = true) ||
+                                event.title.contains("Careers", ignoreCase = true) ->
+                                R.drawable.carrers_day
+                        event.title.contains("Hackathon", ignoreCase = true) -> R.drawable.hackathon
+                        else -> null
+                }
+
         Card(
                 modifier = Modifier.width(200.dp),
                 shape = RoundedCornerShape(12.dp),
@@ -332,13 +351,22 @@ fun EventCard(event: Event) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
                 Column {
-                        // Placeholder image
-                        Box(
-                                modifier =
-                                        Modifier.fillMaxWidth()
-                                                .height(100.dp)
-                                                .background(Color.LightGray)
-                        )
+                        // Event image
+                        if (imageRes != null) {
+                                Image(
+                                        painter = painterResource(id = imageRes),
+                                        contentDescription = event.title,
+                                        modifier = Modifier.fillMaxWidth().height(100.dp),
+                                        contentScale = ContentScale.Crop
+                                )
+                        } else {
+                                Box(
+                                        modifier =
+                                                Modifier.fillMaxWidth()
+                                                        .height(100.dp)
+                                                        .background(Color.LightGray)
+                                )
+                        }
 
                         Column(modifier = Modifier.padding(12.dp)) {
                                 Text(

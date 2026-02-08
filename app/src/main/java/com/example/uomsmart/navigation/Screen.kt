@@ -11,4 +11,7 @@ sealed class Screen(val route: String) {
         fun createRoute(token: String, balance: Double) = "booking_confirmed/$token/$balance"
     }
     object TransactionHistory : Screen("transaction_history")
+    object SustainabilityScout : Screen("sustainability_scout")
+    object Settings : Screen("settings")
+    object Notifications : Screen("notifications")
 }
