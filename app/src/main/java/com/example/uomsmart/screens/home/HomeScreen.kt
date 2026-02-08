@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +20,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -42,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,9 +56,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.uomsmart.R
 import com.example.uomsmart.data.models.Event
 import com.example.uomsmart.data.models.Occupancy
-import com.example.uomsmart.ui.theme.SplashBlueAccent
 import com.example.uomsmart.ui.theme.SplashButtonBlue
-import com.example.uomsmart.ui.theme.UOMGold
+import com.example.uomsmart.viewmodel.AuthViewModel
 import com.example.uomsmart.viewmodel.HomeViewModel
 
 @Composable
@@ -62,7 +65,8 @@ fun HomeScreen(
         onAiScoutClick: () -> Unit = {},
         onSettingsClick: () -> Unit = {},
         onNotificationClick: () -> Unit = {},
-        viewModel: HomeViewModel = viewModel()
+        viewModel: HomeViewModel = viewModel(),
+        authViewModel: AuthViewModel = viewModel()
 ) {
         // Observe ViewModel state
         val events = viewModel.events
@@ -105,13 +109,14 @@ fun HomeScreen(
                                                                 colors =
                                                                         ButtonDefaults.buttonColors(
                                                                                 containerColor =
-                                                                                        Color.LightGray
-                                                                        ),
-                                                                contentPadding =
-                                                                        PaddingValues(
-                                                                                horizontal = 8.dp
+                                                                                        if (topUpAmount ==
+                                                                                                        amount
+                                                                                        )
+                                                                                                SplashButtonBlue
+                                                                                        else
+                                                                                                Color.Gray
                                                                         )
-                                                        ) { Text(amount, color = Color.Black) }
+                                                        ) { Text(amount) }
                                                 }
                                         }
                                 }
@@ -142,7 +147,7 @@ fun HomeScreen(
                 floatingActionButton = {
                         FloatingActionButton(
                                 onClick = onAiScoutClick,
-                                containerColor = SplashButtonBlue,
+                                containerColor = com.example.uomsmart.ui.theme.MintGreen,
                                 shape = CircleShape
                         ) {
                                 Icon(
@@ -176,26 +181,34 @@ fun HomeScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                        Box(
-                                                modifier =
-                                                        Modifier.size(44.dp)
-                                                                .background(
-                                                                        SplashBlueAccent,
-                                                                        RoundedCornerShape(12.dp)
-                                                                ),
-                                                contentAlignment = Alignment.Center
-                                        ) {
-                                                Icon(
-                                                        painter =
-                                                                painterResource(
-                                                                        id =
-                                                                                R.drawable
-                                                                                        .ic_graduation_cap
-                                                                ),
-                                                        contentDescription = "Logo",
-                                                        tint = Color.White,
-                                                        modifier = Modifier.size(28.dp)
-                                                )
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Box(
+                                                        modifier =
+                                                                Modifier.size(48.dp)
+                                                                        .clip(CircleShape)
+                                                                        .background(
+                                                                                Color.LightGray
+                                                                        ),
+                                                        contentAlignment = Alignment.Center
+                                                ) {
+                                                        Icon(
+                                                                imageVector = Icons.Default.Person,
+                                                                contentDescription = "Profile",
+                                                                tint = Color.White
+                                                        )
+                                                }
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Column {
+                                                        Text(
+                                                                text =
+                                                                        "Hello, ${authViewModel.currentUser?.displayName?.split(" ")?.firstOrNull() ?: "Student"}!",
+                                                                fontSize = 20.sp,
+                                                                fontWeight = FontWeight.Bold,
+                                                                color =
+                                                                        com.example.uomsmart.ui
+                                                                                .theme.TextPrimary
+                                                        )
+                                                }
                                         }
 
                                         Row {
@@ -209,7 +222,9 @@ fun HomeScreen(
                                                                         ),
                                                                 contentDescription =
                                                                         "Notifications",
-                                                                tint = Color.Gray
+                                                                tint =
+                                                                        com.example.uomsmart.ui
+                                                                                .theme.TextPrimary
                                                         )
                                                 }
                                                 IconButton(onClick = onSettingsClick) {
@@ -221,106 +236,207 @@ fun HomeScreen(
                                                                                                 .ic_settings
                                                                         ),
                                                                 contentDescription = "Settings",
-                                                                tint = Color.Gray
+                                                                tint =
+                                                                        com.example.uomsmart.ui
+                                                                                .theme.TextPrimary
                                                         )
                                                 }
                                         }
                                 }
                         }
 
-                        // Campus Wallet Section (Moved to Top)
+                        // Campus Wallet Card
                         item {
-                                Column(
+                                Box(
                                         modifier =
                                                 Modifier.fillMaxWidth()
-                                                        .padding(horizontal = 16.dp)
-                                                        .padding(bottom = 24.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                                        .padding(
+                                                                horizontal = 16.dp,
+                                                                vertical = 8.dp
+                                                        )
+                                                        .height(180.dp)
+                                                        .clip(RoundedCornerShape(20.dp))
+                                                        .background(
+                                                                brush =
+                                                                        androidx.compose.ui.graphics
+                                                                                .Brush
+                                                                                .horizontalGradient(
+                                                                                        colors =
+                                                                                                listOf(
+                                                                                                        com.example
+                                                                                                                .uomsmart
+                                                                                                                .ui
+                                                                                                                .theme
+                                                                                                                .WalletGradientStart,
+                                                                                                        com.example
+                                                                                                                .uomsmart
+                                                                                                                .ui
+                                                                                                                .theme
+                                                                                                                .WalletGradientEnd
+                                                                                                )
+                                                                                )
+                                                        )
                                 ) {
-                                        Text(
-                                                text = "Campus Wallet",
-                                                color = Color.Gray,
-                                                fontSize = 14.sp
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Row(
-                                                verticalAlignment = Alignment.CenterVertically,
+                                        // Background Wave Decoration (Simplified as a
+                                        // circle for
+                                        // now)
+                                        Box(
                                                 modifier =
-                                                        Modifier.clickable {
-                                                                showTopUpDialog = true
-                                                        }
+                                                        Modifier.align(Alignment.BottomStart)
+                                                                .size(200.dp)
+                                                                .padding(
+                                                                        start = (-50).dp,
+                                                                        bottom = (-100).dp
+                                                                )
+                                                                .clip(CircleShape)
+                                                                .background(
+                                                                        Color.White.copy(
+                                                                                alpha = 0.1f
+                                                                        )
+                                                                )
+                                        )
+
+                                        Column(
+                                                modifier = Modifier.fillMaxSize().padding(20.dp),
+                                                verticalArrangement = Arrangement.SpaceBetween
                                         ) {
-                                                Icon(
-                                                        painter =
-                                                                painterResource(
-                                                                        id = R.drawable.ic_coin
-                                                                ),
-                                                        contentDescription = "Coins",
-                                                        tint = UOMGold,
-                                                        modifier = Modifier.size(32.dp)
-                                                )
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Text(
-                                                        text = String.format("%.2f", walletBalance),
-                                                        fontSize = 32.sp,
-                                                        fontWeight = FontWeight.Bold
-                                                )
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Text(
-                                                        text = "UOM Coins",
-                                                        color = SplashButtonBlue,
-                                                        fontSize = 16.sp,
-                                                        fontWeight = FontWeight.Medium
-                                                )
+                                                Row(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        horizontalArrangement =
+                                                                Arrangement.SpaceBetween,
+                                                        verticalAlignment = Alignment.Top
+                                                ) {
+                                                        Column {
+                                                                Text(
+                                                                        text = "Campus Wallet",
+                                                                        color =
+                                                                                Color.White.copy(
+                                                                                        alpha = 0.8f
+                                                                                ),
+                                                                        fontSize = 14.sp
+                                                                )
+                                                                Spacer(
+                                                                        modifier =
+                                                                                Modifier.height(
+                                                                                        4.dp
+                                                                                )
+                                                                )
+                                                                Text(
+                                                                        text =
+                                                                                "${String.format("%,.0f", walletBalance)} UOM Coins",
+                                                                        color = Color.White,
+                                                                        fontSize = 28.sp,
+                                                                        fontWeight = FontWeight.Bold
+                                                                )
+                                                        }
+
+                                                        // Reload Button
+                                                        TextButton(
+                                                                onClick = { showTopUpDialog = true }
+                                                        ) {
+                                                                Text(
+                                                                        text = "Reload",
+                                                                        color = Color.White,
+                                                                        fontWeight =
+                                                                                FontWeight.SemiBold
+                                                                )
+                                                        }
+                                                }
                                         }
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Button(
-                                                onClick = { showTopUpDialog = true },
-                                                colors =
-                                                        ButtonDefaults.buttonColors(
-                                                                containerColor = SplashButtonBlue
-                                                        ),
-                                                shape = RoundedCornerShape(8.dp),
-                                                modifier = Modifier.height(36.dp)
-                                        ) { Text("Top Up", fontSize = 12.sp) }
+
+                                        // Bottom Decoration Line
+                                        Box(
+                                                modifier =
+                                                        Modifier.fillMaxWidth()
+                                                                .height(40.dp)
+                                                                .background(
+                                                                        brush =
+                                                                                Brush.verticalGradient(
+                                                                                        colors =
+                                                                                                listOf(
+                                                                                                        Color.Transparent,
+                                                                                                        Color.White
+                                                                                                                .copy(
+                                                                                                                        alpha =
+                                                                                                                                0.2f
+                                                                                                                )
+                                                                                                )
+                                                                                )
+                                                                )
+                                                                .align(Alignment.BottomCenter)
+                                        )
                                 }
                         }
 
                         // Upcoming Events Section
                         item {
-                                Text(
-                                        text = "Upcoming Events",
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold,
+                                Row(
                                         modifier =
-                                                Modifier.padding(
-                                                        horizontal = 16.dp,
-                                                        vertical = 8.dp
-                                                )
-                                )
+                                                Modifier.fillMaxWidth()
+                                                        .padding(
+                                                                horizontal = 16.dp,
+                                                                vertical = 8.dp
+                                                        ),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                        Text(
+                                                text = "Upcoming Events",
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = com.example.uomsmart.ui.theme.TextPrimary
+                                        )
+                                        Text(
+                                                text = "See All",
+                                                fontSize = 14.sp,
+                                                color = SplashButtonBlue,
+                                                fontWeight = FontWeight.Medium,
+                                                modifier =
+                                                        Modifier
+                                                                .clickable { /* TODO: Navigate to events */
+                                                                }
+                                        )
+                                }
                         }
 
                         item {
                                 LazyRow(
                                         contentPadding = PaddingValues(horizontal = 16.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) { items(events) { event -> EventCard(event = event) } }
                         }
 
                         // Live Study Spot Occupancy
                         item {
-                                Text(
-                                        text = "Live Study Spot Occupancy",
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold,
+                                Row(
                                         modifier =
-                                                Modifier.padding(
-                                                        start = 16.dp,
-                                                        end = 16.dp,
-                                                        top = 24.dp,
-                                                        bottom = 8.dp
-                                                )
-                                )
+                                                Modifier.fillMaxWidth()
+                                                        .padding(
+                                                                start = 16.dp,
+                                                                end = 16.dp,
+                                                                top = 24.dp,
+                                                                bottom = 8.dp
+                                                        ),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                        Text(
+                                                text = "Live Study Spot Occupancy",
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = com.example.uomsmart.ui.theme.TextPrimary
+                                        )
+                                        Text(
+                                                text = "View Map",
+                                                fontSize = 14.sp,
+                                                color = SplashButtonBlue,
+                                                fontWeight = FontWeight.Medium,
+                                                modifier =
+                                                        Modifier
+                                                                .clickable { /* TODO: Navigate to map */
+                                                                }
+                                        )
+                                }
                         }
 
                         items(occupancies) { occupancy -> OccupancyCard(occupancy = occupancy) }
@@ -331,8 +447,8 @@ fun HomeScreen(
 @Composable
 fun EventCard(event: Event) {
         Card(
-                modifier = Modifier.width(200.dp),
-                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.width(280.dp), // Wider card
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
@@ -341,35 +457,66 @@ fun EventCard(event: Event) {
                         Box(
                                 modifier =
                                         Modifier.fillMaxWidth()
-                                                .height(100.dp)
+                                                .height(140.dp)
                                                 .background(Color.LightGray)
-                        )
+                        ) {
+                                // Overlay Text (Title)
+                                Box(
+                                        modifier =
+                                                Modifier.fillMaxSize()
+                                                        .background(
+                                                                brush =
+                                                                        androidx.compose.ui.graphics
+                                                                                .Brush
+                                                                                .verticalGradient(
+                                                                                        colors =
+                                                                                                listOf(
+                                                                                                        Color.Transparent,
+                                                                                                        Color.Black
+                                                                                                                .copy(
+                                                                                                                        alpha =
+                                                                                                                                0.7f
+                                                                                                                )
+                                                                                                )
+                                                                                )
+                                                        )
+                                )
+
+                                Text(
+                                        text = event.title,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        modifier =
+                                                Modifier.align(Alignment.BottomStart).padding(12.dp)
+                                )
+                        }
 
                         Column(modifier = Modifier.padding(12.dp)) {
                                 Text(
-                                        text = event.title,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 14.sp,
-                                        maxLines = 1
+                                        text = "Future-Proof Your Skills", // Subtitle placeholder
+                                        fontSize = 12.sp,
+                                        color = Color.Gray
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(text = "📅", fontSize = 12.sp)
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                                text = event.date,
-                                                fontSize = 12.sp,
-                                                color = Color.Gray
+                                        Icon(
+                                                imageVector =
+                                                        Icons.Default.DateRange, // Use vector icon
+                                                contentDescription = null,
+                                                tint = Color.Gray,
+                                                modifier = Modifier.size(14.dp)
                                         )
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(text = "📍", fontSize = 12.sp)
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                                text = event.location,
+                                                text =
+                                                        "${event.date} • ${event.location}", // Combined
                                                 fontSize = 12.sp,
                                                 color = Color.Gray,
-                                                maxLines = 1
+                                                maxLines = 1,
+                                                overflow =
+                                                        androidx.compose.ui.text.style.TextOverflow
+                                                                .Ellipsis
                                         )
                                 }
                         }
@@ -379,57 +526,92 @@ fun EventCard(event: Event) {
 
 @Composable
 fun OccupancyCard(occupancy: Occupancy) {
+        // Derive status from percentage
+        val status =
+                when {
+                        occupancy.currentPercentage >= 80 -> "Busy"
+                        occupancy.currentPercentage >= 50 -> "Moderate"
+                        else -> "Quiet"
+                }
+
+        val statusColor =
+                when (status) {
+                        "Busy" -> com.example.uomsmart.ui.theme.StatusRed
+                        "Quiet" -> com.example.uomsmart.ui.theme.StatusGreen
+                        else -> com.example.uomsmart.ui.theme.StatusBlue
+                }
+
+        val progress =
+                when (status) {
+                        "Busy" -> 0.8f
+                        "Quiet" -> 0.2f
+                        else -> 0.5f
+                }
+
         Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
-                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
                 Row(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                         Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                         text = occupancy.location,
-                                        fontWeight = FontWeight.Medium,
-                                        fontSize = 16.sp
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = com.example.uomsmart.ui.theme.TextPrimary
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                        text = "${occupancy.currentPercentage}% Occupied",
-                                        color =
-                                                when {
-                                                        occupancy.currentPercentage >= 80 ->
-                                                                Color.Red
-                                                        occupancy.currentPercentage >= 50 ->
-                                                                SplashButtonBlue
-                                                        else -> Color(0xFF4CAF50)
-                                                },
-                                        fontSize = 14.sp
-                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                        // Status Pill
+                                        Box(
+                                                modifier =
+                                                        Modifier.background(
+                                                                        statusColor,
+                                                                        RoundedCornerShape(50)
+                                                                )
+                                                                .padding(
+                                                                        horizontal = 12.dp,
+                                                                        vertical = 4.dp
+                                                                )
+                                        ) {
+                                                Text(
+                                                        text = status,
+                                                        color = Color.White,
+                                                        fontSize = 12.sp,
+                                                        fontWeight = FontWeight.Bold
+                                                )
+                                        }
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        // Progress Bar
+                                        LinearProgressIndicator(
+                                                progress = progress,
+                                                modifier =
+                                                        Modifier.width(100.dp)
+                                                                .height(6.dp)
+                                                                .clip(RoundedCornerShape(3.dp)),
+                                                color =
+                                                        androidx.compose.ui.graphics.Color(
+                                                                0xFF3F51B5
+                                                        ), // Dark Blue
+                                                trackColor =
+                                                        androidx.compose.ui.graphics.Color(
+                                                                0xFFEEEEEE
+                                                        )
+                                        )
+                                }
                         }
 
-                        // Vertical progress bar
-                        Box(
-                                modifier =
-                                        Modifier.width(12.dp)
-                                                .height(48.dp)
-                                                .clip(RoundedCornerShape(6.dp))
-                                                .background(Color(0xFFE0E0E0)),
-                                contentAlignment = Alignment.BottomCenter
-                        ) {
-                                Box(
-                                        modifier =
-                                                Modifier.fillMaxWidth()
-                                                        .fillMaxHeight(
-                                                                occupancy.currentPercentage / 100f
-                                                        )
-                                                        .clip(RoundedCornerShape(6.dp))
-                                                        .background(SplashButtonBlue)
-                                )
-                        }
+                        Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = "Details",
+                                tint = Color.Gray
+                        )
                 }
         }
 }

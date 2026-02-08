@@ -37,3 +37,11 @@ val OnSurfaceVariant = Color(0xFF49454F)
 val TextPrimary = Color(0xFF1C1B1F)
 val TextSecondary = Color(0xFF49454F)
 val TextTertiary = Color(0xFF79747E)
+
+// Dashboard Refactor Colors
+val MintGreen = Color(0xFF6FCF97)
+val WalletGradientStart = Color(0xFF4CA1AF)
+val WalletGradientEnd = Color(0xFF2C3E50)
+val StatusRed = Color(0xFFE57373) // For Busy
+val StatusGreen = Color(0xFF81C784) // For Quiet
+val StatusBlue = Color(0xFF64B5F6) // For Moderate
