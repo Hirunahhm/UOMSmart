@@ -1,5 +1,6 @@
 package com.example.uomsmart.screens.canteen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -269,6 +271,19 @@ fun CanteenScreen(
 
 @Composable
 fun MealCard(meal: Meal, onBookClick: () -> Unit) {
+    // Map meal name to local drawable resource
+    val imageRes =
+            when {
+                meal.name.contains("Burger", ignoreCase = true) -> R.drawable.chicken_burger
+                meal.name.contains("Fried Rice", ignoreCase = true) -> R.drawable.fried_rice
+                meal.name.contains("Kottu", ignoreCase = true) -> R.drawable.veg_kottu
+                meal.name.contains("Coffee", ignoreCase = true) -> R.drawable.ice_coffee
+                meal.name.contains("Rice", ignoreCase = true) &&
+                        meal.name.contains("Fish", ignoreCase = true) ->
+                        R.drawable.rice_and_curry_fish
+                else -> null
+            }
+
     Card(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             shape = RoundedCornerShape(16.dp),
@@ -276,8 +291,18 @@ fun MealCard(meal: Meal, onBookClick: () -> Unit) {
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
-            // Image placeholder
-            Box(modifier = Modifier.fillMaxWidth().height(140.dp).background(Color(0xFFE8E8E8)))
+            // Image
+            if (imageRes != null) {
+                Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = meal.name,
+                        modifier = Modifier.fillMaxWidth().height(140.dp),
+                        contentScale = ContentScale.Crop
+                )
+            } else {
+                // Placeholder image
+                Box(modifier = Modifier.fillMaxWidth().height(140.dp).background(Color(0xFFE8E8E8)))
+            }
 
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = meal.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)

@@ -1,7 +1,6 @@
 package com.example.uomsmart.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -12,49 +11,48 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val LightColorScheme = lightColorScheme(
-    primary = UOMMaroon,
-    onPrimary = OnMaroon,
-    primaryContainer = UOMPrimaryContainer,
-    onPrimaryContainer = UOMMaroonDark,
-    secondary = UOMGold,
-    onSecondary = OnGold,
-    secondaryContainer = UOMGoldLight,
-    onSecondaryContainer = UOMGoldDark,
-    tertiary = UOMTeal,
-    onTertiary = OnTeal,
-    tertiaryContainer = UOMTealLight,
-    onTertiaryContainer = UOMTeal,
-    background = UOMSurface,
-    onBackground = OnSurface,
-    surface = UOMSurface,
-    onSurface = OnSurface,
-    surfaceVariant = UOMSurfaceVariant,
-    onSurfaceVariant = OnSurfaceVariant
-)
+private val LightColorScheme =
+        lightColorScheme(
+                primary = UOMBlue,
+                onPrimary = OnBlue,
+                primaryContainer = UOMPrimaryContainer,
+                onPrimaryContainer = UOMBlueDark,
+                secondary = UOMGold,
+                onSecondary = OnGold,
+                secondaryContainer = UOMGoldLight,
+                onSecondaryContainer = UOMGoldDark,
+                tertiary = UOMTeal,
+                onTertiary = OnTeal,
+                tertiaryContainer = UOMTealLight,
+                onTertiaryContainer = UOMTeal,
+                background = UOMSurface,
+                onBackground = OnSurface,
+                surface = UOMSurface,
+                onSurface = OnSurface,
+                surfaceVariant = UOMSurfaceVariant,
+                onSurfaceVariant = OnSurfaceVariant
+        )
 
-private val DarkColorScheme = darkColorScheme(
-    primary = UOMMaroonLight,
-    onPrimary = OnMaroon,
-    primaryContainer = UOMMaroonDark,
-    onPrimaryContainer = UOMPrimaryContainer,
-    secondary = UOMGoldLight,
-    onSecondary = OnGold,
-    secondaryContainer = UOMGoldDark,
-    onSecondaryContainer = UOMGoldLight,
-    tertiary = UOMTealLight,
-    onTertiary = OnTeal,
-    tertiaryContainer = UOMTeal,
-    onTertiaryContainer = UOMTealLight
-)
+private val DarkColorScheme =
+        darkColorScheme(
+                primary = UOMBlueLight,
+                onPrimary = OnBlue,
+                primaryContainer = UOMBlueDark,
+                onPrimaryContainer = UOMPrimaryContainer,
+                secondary = UOMGoldLight,
+                onSecondary = OnGold,
+                secondaryContainer = UOMGoldDark,
+                onSecondaryContainer = UOMGoldLight,
+                tertiary = UOMTealLight,
+                onTertiary = OnTeal,
+                tertiaryContainer = UOMTeal,
+                onTertiaryContainer = UOMTealLight
+        )
 
 @Composable
-fun UOMSmartTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
+fun UOMSmartTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-    
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -64,9 +62,5 @@ fun UOMSmartTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
 }
