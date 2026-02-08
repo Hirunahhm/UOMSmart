@@ -12,4 +12,6 @@ sealed class Screen(val route: String) {
     }
     object TransactionHistory : Screen("transaction_history")
     object SustainabilityScout : Screen("sustainability_scout")
+    object Settings : Screen("settings")
+    object Notifications : Screen("notifications")
 }

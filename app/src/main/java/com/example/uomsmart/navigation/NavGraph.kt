@@ -140,7 +140,9 @@ fun NavGraph(navController: NavHostController, startDestination: String = Screen
                 HomeScreen(
                         onAiScoutClick = {
                             navController.navigate(Screen.SustainabilityScout.route)
-                        }
+                        },
+                        onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                        onNotificationClick = { navController.navigate(Screen.Notifications.route) }
                 )
             }
 
@@ -212,6 +214,18 @@ fun NavGraph(navController: NavHostController, startDestination: String = Screen
 
             composable(Screen.SustainabilityScout.route) {
                 com.example.uomsmart.screens.scout.ScoutScreen(
+                        onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.Settings.route) {
+                com.example.uomsmart.screens.settings.SettingsScreen(
+                        onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.Notifications.route) {
+                com.example.uomsmart.screens.notifications.NotificationScreen(
                         onBackClick = { navController.popBackStack() }
                 )
             }

@@ -58,7 +58,12 @@ import com.example.uomsmart.ui.theme.UOMGold
 import com.example.uomsmart.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen(onAiScoutClick: () -> Unit = {}, viewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(
+        onAiScoutClick: () -> Unit = {},
+        onSettingsClick: () -> Unit = {},
+        onNotificationClick: () -> Unit = {},
+        viewModel: HomeViewModel = viewModel()
+) {
         // Observe ViewModel state
         val events = viewModel.events
         val occupancies = viewModel.occupancies
@@ -194,7 +199,7 @@ fun HomeScreen(onAiScoutClick: () -> Unit = {}, viewModel: HomeViewModel = viewM
                                         }
 
                                         Row {
-                                                IconButton(onClick = {}) {
+                                                IconButton(onClick = onNotificationClick) {
                                                         Icon(
                                                                 painter =
                                                                         painterResource(
@@ -207,7 +212,7 @@ fun HomeScreen(onAiScoutClick: () -> Unit = {}, viewModel: HomeViewModel = viewM
                                                                 tint = Color.Gray
                                                         )
                                                 }
-                                                IconButton(onClick = {}) {
+                                                IconButton(onClick = onSettingsClick) {
                                                         Icon(
                                                                 painter =
                                                                         painterResource(
